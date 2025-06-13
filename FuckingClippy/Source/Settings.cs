@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-/*
+﻿/*
 -- Things that can be an option --
 - Search engine
 - tmrIdleSay.Interval
@@ -14,15 +9,12 @@ using System.Text;
 
 */
 
-namespace FuckingClippy
+namespace FuckingClippy;
+
+internal class Settings
 {
-    class Settings
-    {
+}
 
-    }
-
-    class IniHandler
-    {
-
-    }
+internal class IniHandler
+{
 }

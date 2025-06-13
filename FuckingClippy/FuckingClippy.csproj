@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FuckingClippy</RootNamespace>
     <AssemblyName>FuckingClippy</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -22,7 +22,8 @@
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <LangVersion>6</LangVersion>
+    <LangVersion>latest</LangVersion>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -33,7 +34,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DebugSymbols>false</DebugSymbols>
-    <LangVersion>6</LangVersion>
+    <LangVersion>latest</LangVersion>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <NoWin32Manifest>true</NoWin32Manifest>
@@ -50,7 +52,7 @@
     <DefineConstants>TRACE;DEBUG;OFFICE</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
-    <LangVersion>6</LangVersion>
+    <LangVersion>latest</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
@@ -58,26 +60,38 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <PlatformTarget>x86</PlatformTarget>
     <OutputPath>bin\x86\Debug\</OutputPath>
+    <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <PlatformTarget>x86</PlatformTarget>
     <OutputPath>bin\x86\Release\</OutputPath>
+    <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug %28Office%29|x86'">
     <PlatformTarget>x86</PlatformTarget>
     <OutputPath>bin\x86\Debug %28Office%29\</OutputPath>
+    <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <OutputPath>bin\x64\Debug\</OutputPath>
     <PlatformTarget>x64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
     <PlatformTarget>x64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug %28Office%29|x64'">
     <OutputPath>bin\x64\Debug %28Office%29\</OutputPath>
     <PlatformTarget>x64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -85,6 +99,12 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Culture\ru-RU.Designer.cs">
+      <DependentUpon>ru-RU.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Source\AnimationSystem.cs" />
     <Compile Include="Source\DialogSystem.cs" />
     <Compile Include="Source\Forms\BubbleForm.cs">
       <SubType>Form</SubType>
@@ -124,6 +144,10 @@
     <Compile Include="Source\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Culture\ru-RU.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ru-RU.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Source\Forms\SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -784,23 +808,23 @@
     <EmbeddedResource Include="Images\Clippy\Animations\RollPaper\7.png" />
     <EmbeddedResource Include="Images\Clippy\Animations\RollPaper\8.png" />
     <EmbeddedResource Include="Images\Clippy\Animations\RollPaper\9.png" />
-    <EmbeddedResource Include="Images\Clippy\Animations\ScrachingHead\0.png" />
-    <EmbeddedResource Include="Images\Clippy\Animations\ScrachingHead\1.png" />
-    <EmbeddedResource Include="Images\Clippy\Animations\ScrachingHead\10.png" />
-    <EmbeddedResource Include="Images\Clippy\Animations\ScrachingHead\11.png" />
-    <EmbeddedResource Include="Images\Clippy\Animations\ScrachingHead\12.png" />
-    <EmbeddedResource Include="Images\Clippy\Animations\ScrachingHead\13.png" />
-    <EmbeddedResource Include="Images\Clippy\Animations\ScrachingHead\14.png" />
-    <EmbeddedResource Include="Images\Clippy\Animations\ScrachingHead\15.png" />
-    <EmbeddedResource Include="Images\Clippy\Animations\ScrachingHead\2.png" />
-    <EmbeddedResource Include="Images\Clippy\Animations\ScrachingHead\3.png" />
-    <EmbeddedResource Include="Images\Clippy\Animations\ScrachingHead\4.png" />
-    <EmbeddedResource Include="Images\Clippy\Animations\ScrachingHead\5.png" />
-    <EmbeddedResource Include="Images\Clippy\Animations\ScrachingHead\6.png" />
-    <EmbeddedResource Include="Images\Clippy\Animations\ScrachingHead\7.png" />
-    <EmbeddedResource Include="Images\Clippy\Animations\ScrachingHead\8.png" />
-    <EmbeddedResource Include="Images\Clippy\Animations\ScrachingHead\9.png" />
-    <EmbeddedResource Include="Images\Clippy\Animations\ScrachingHead\16.png" />
+    <EmbeddedResource Include="Images\Clippy\Animations\ScratchingHead\0.png" />
+    <EmbeddedResource Include="Images\Clippy\Animations\ScratchingHead\1.png" />
+    <EmbeddedResource Include="Images\Clippy\Animations\ScratchingHead\10.png" />
+    <EmbeddedResource Include="Images\Clippy\Animations\ScratchingHead\11.png" />
+    <EmbeddedResource Include="Images\Clippy\Animations\ScratchingHead\12.png" />
+    <EmbeddedResource Include="Images\Clippy\Animations\ScratchingHead\13.png" />
+    <EmbeddedResource Include="Images\Clippy\Animations\ScratchingHead\14.png" />
+    <EmbeddedResource Include="Images\Clippy\Animations\ScratchingHead\15.png" />
+    <EmbeddedResource Include="Images\Clippy\Animations\ScratchingHead\2.png" />
+    <EmbeddedResource Include="Images\Clippy\Animations\ScratchingHead\3.png" />
+    <EmbeddedResource Include="Images\Clippy\Animations\ScratchingHead\4.png" />
+    <EmbeddedResource Include="Images\Clippy\Animations\ScratchingHead\5.png" />
+    <EmbeddedResource Include="Images\Clippy\Animations\ScratchingHead\6.png" />
+    <EmbeddedResource Include="Images\Clippy\Animations\ScratchingHead\7.png" />
+    <EmbeddedResource Include="Images\Clippy\Animations\ScratchingHead\8.png" />
+    <EmbeddedResource Include="Images\Clippy\Animations\ScratchingHead\9.png" />
+    <EmbeddedResource Include="Images\Clippy\Animations\ScratchingHead\16.png" />
     <EmbeddedResource Include="Images\Clippy\Animations\Telescope\0.png" />
     <EmbeddedResource Include="Images\Clippy\Animations\Telescope\1.png" />
     <EmbeddedResource Include="Images\Clippy\Animations\Telescope\10.png" />
@@ -964,6 +988,10 @@
     <EmbeddedResource Include="Images\Clippy\Animations\Shovel\1.png" />
     <Content Include="main.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

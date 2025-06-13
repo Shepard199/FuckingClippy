@@ -1,174 +1,193 @@
 ﻿using System;
 using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace FuckingClippy
 {
     public partial class MainForm : TransparentForm
     {
-        Timer IdleTalkTimer = new Timer();
-        Timer IdleAnimationTimer = new Timer();
+        private readonly Timer _idleAnimationTimer = new();
+        private readonly Timer _idleTalkTimer = new();
+        private const int IdleAnimationInterval = 30000; // 30 секунд
+        private const int IdleTalkInterval = 270000; // 4.5 минуты
 
-        public MainForm() : base()
+        public MainForm()
         {
-            Utils.Log("Initializing MainForm...");
+#if DEBUG
+            Utils.Log("Инициализация MainForm...");
+#endif
 
             InitializeComponent();
 
-            Utils.Log("MainForm initiated");
+            // Инициализация ResourceManager
+            InitiateCulture();
+
+#if DEBUG
+            Utils.Log("MainForm инициализирован");
+#endif
 
             SuspendLayout();
 
-            //TODO: Uncomment when translations are ready.
-            //InitiateCulture();
-            
-            ShowIcon = false; // Use main icon. (Windows)
+            ShowIcon = false; // Использовать главную иконку (Windows)
 
             Character.Initialize(this);
 
-            // Grab the current Screen info and locate the character
-            // at the bottom right with a margin of 30 pixels.
-            {
-                Screen sc = Screen.PrimaryScreen; // Screen.FromControl(this)
-                Location = new Point(
-                        sc.WorkingArea.Width - (Width + 30),
-                        sc.WorkingArea.Height - (Height + 30)
-                    );
-            }
+            // Позиционирование формы в правом нижнем углу с отступом 30 пикселей
+            var sc = Screen.FromControl(this);
+            Location = new Point(
+                sc.WorkingArea.Width - (Width + 30),
+                sc.WorkingArea.Height - (Height + 30)
+            );
 
             picAssistant.Dock = DockStyle.Fill;
             picAssistant.MouseDown += Assistant_MouseDown;
             picAssistant.MouseUp += Assistant_MouseUp;
             picAssistant.MouseMove += Assistant_MouseMove;
 
-            IdleAnimationTimer.Tick += TmrIdleAni_Tick;
-            IdleTalkTimer.Tick += TmrIdleSay_Tick;
-            IdleAnimationTimer.Interval = 30000; // 30 seconds
-            IdleTalkTimer.Interval = 270000; // 4.5 minutes
+            _idleAnimationTimer.Tick += TmrIdleAni_Tick;
+            _idleTalkTimer.Tick += TmrIdleSay_Tick;
+            _idleAnimationTimer.Interval = IdleAnimationInterval;
+            _idleTalkTimer.Interval = IdleTalkInterval;
 
-            TopMost = true; // Only hell now. :-)
+            TopMost = true;
+
 #if DEBUG
-            ToolStripItem[] DebugItems = new ToolStripItem[2];
-
-            DebugItems[0] = new ToolStripMenuItem()
-            {
-                Text = "[Debug] Prompt"
-            };
-            DebugItems[0].Click += (s, e) => Character.Prompt();
-
-            DebugItems[1] = new ToolStripMenuItem()
-            {
-                Text = "[Debug] Say (Random)"
-            };
-            DebugItems[1].Click += (s, e) => Character.SayRandom();
-
-            cmsCharacter.Items.AddRange(DebugItems);
+            AddDebugMenuItems();
 #endif
             cmsCharacter.ResumeLayout(false);
-            ResumeLayout(true);
+            ResumeLayout(false);
 
             Character.PlayAnimation(Animation.FadeIn);
-            IdleAnimationTimer.Start();
-            IdleTalkTimer.Start();
-
-            GC.Collect();
+            _idleAnimationTimer.Start();
+            _idleTalkTimer.Start();
 
 #if OFFICE
-            ExcelHelper.Initialize();
+            _ = ExcelHelperInstance.Value;
 #elif OFFICE && DEBUG
-            // Also should be a dynamic setting with CLI switch.
-            // And started manually by the user probably? Or scan for process?
             ExcelHelper.Test();
 #endif
         }
 
-        /// <summary>
-        /// Exit main application while playing the FadeOut animation.
-        /// </summary>
-        public void Exit()
+        #region ExcelHelper Lazy Initialization
+#if OFFICE
+        private static readonly Lazy<ExcelHelper> ExcelHelperInstance = new(() =>
         {
-            Character.PlayAnimation(Animation.FadeOut);
+            ExcelHelper.Initialize();
+            return new ExcelHelper();
+        });
+#endif
+        #endregion
 
-            // Dirty/temporary solution
-            Timer a = new Timer()
-            {
-                Interval = 3 * 125 // Temporary
-            };
-            a.Tick += (s, e) => { Close(); };
-            a.Start();
+        #region Debug Menu
+#if DEBUG
+        private void AddDebugMenuItems()
+        {
+            cmsCharacter.Items.Add(new ToolStripMenuItem("[Debug] Prompt", null, (s, e) => Character.Prompt()));
+            cmsCharacter.Items.Add(new ToolStripMenuItem("[Debug] Say (Random)", null, (s, e) => Character.SayRandom()));
+        }
+#endif
+        #endregion
+
+        private void ShowBubbleMessage(string message)
+        {
+            var bubble = new BubbleForm(message);
+            bubble.PositionNear(Location, new Size(Width + 10, 0)); // Справа от MainForm
+            bubble.Show();
         }
 
-#region Idle timers
-        void TmrIdleSay_Tick(object sender, EventArgs e)
+        public async void Exit()
+        {
+            Character.PlayAnimation(Animation.FadeOut);
+            await Task.Delay(375);
+            Close();
+        }
+
+        #region Idle Timers
+        private void TmrIdleSay_Tick(object sender, EventArgs e)
         {
             Character.SayRandom();
         }
 
-        void TmrIdleAni_Tick(object sender, EventArgs e)
+        private void TmrIdleAni_Tick(object sender, EventArgs e)
         {
             Character.PlayRandomAnimation();
         }
-#endregion
+        #endregion
 
-#region Mouse events
-        bool FormDown, IsPrompting;
-        Point LastMouseLocation, LastFormLocation;
+        #region Mouse Events
+        private bool _formDown, _isPrompting;
+        private Point _lastMouseLocation, _lastFormLocation;
 
-        void Assistant_MouseMove(object sender, MouseEventArgs e)
+        private void Assistant_MouseMove(object sender, MouseEventArgs e)
         {
-            if (FormDown)
+            if (_formDown)
             {
-                Location =
-                    new Point((Location.X - LastMouseLocation.X) + e.X,
-                    (Location.Y - LastMouseLocation.Y) + e.Y);
-
-                Update();
+                Location = new Point(
+                    Location.X - _lastMouseLocation.X + e.X,
+                    Location.Y - _lastMouseLocation.Y + e.Y);
             }
         }
 
-        void Assistant_MouseUp(object sender, MouseEventArgs e)
+        private void Assistant_MouseUp(object sender, MouseEventArgs e)
         {
-            FormDown = false;
+            _formDown = false;
 
-            if (e.Button == MouseButtons.Left)
-                if (LastFormLocation.X == Location.X &&
-                    LastFormLocation.Y == Location.Y &&
-                    !IsPrompting)
-                {
-                    IsPrompting = true;
-                    Character.Prompt();
-                }
+            if (e.Button == MouseButtons.Left &&
+                _lastFormLocation.X == Location.X &&
+                _lastFormLocation.Y == Location.Y &&
+                !_isPrompting)
+            {
+                _isPrompting = true;
+                Character.Prompt();
+            }
         }
 
-        void Assistant_MouseDown(object sender, MouseEventArgs e)
+        private void Assistant_MouseDown(object sender, MouseEventArgs e)
         {
-            FormDown = true;
-            IsPrompting = false;
-            LastMouseLocation = e.Location;
-            LastFormLocation = Location;
+            _formDown = true;
+            _isPrompting = false;
+            _lastMouseLocation = e.Location;
+            _lastFormLocation = Location;
         }
-#endregion
+        #endregion
 
-#region Context menu events
-        void CmsiHide_Click(object sender, EventArgs e)
+        #region Context Menu Events
+        private void CmsiHide_Click(object sender, EventArgs e)
         {
             Exit();
         }
 
-        void CsmiOptions_Click(object sender, EventArgs e)
-        { // Settings -> Options tab
+        private void CsmiOptions_Click(object sender, EventArgs e)
+        {
             new SettingsForm(Tab.Options).ShowDialog();
         }
 
-        void CmsiChooseAssistant_Click(object sender, EventArgs e)
-        { // Settings -> Assistant tab
+        private void CmsiChooseAssistant_Click(object sender, EventArgs e)
+        {
             new SettingsForm(Tab.Assistant).ShowDialog();
         }
 
-        void CmsiAnimate_Click(object sender, EventArgs e)
+        private void CmsiAnimate_Click(object sender, EventArgs e)
         {
             Character.PlayRandomAnimation();
         }
-#endregion
+        #endregion
+
+        #region Dispose
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _idleAnimationTimer?.Stop();
+                _idleTalkTimer?.Stop();
+                _idleAnimationTimer?.Dispose();
+                _idleTalkTimer?.Dispose();
+                components?.Dispose();
+                _rm?.ReleaseAllResources();
+            }
+            base.Dispose(disposing);
+        }
+        #endregion
     }
 }

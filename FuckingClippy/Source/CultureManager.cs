@@ -1,47 +1,77 @@
-﻿using System.Globalization;
+﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Resources;
 using static System.Threading.Thread;
 
-namespace FuckingClippy
+namespace FuckingClippy;
+
+partial class MainForm
 {
-    partial class MainForm
+    private const string DefaultCulture = "en-US";
+
+    private static readonly Dictionary<string, string> SupportedCultures = new()
     {
-        /// <summary>
-        /// Culture (locale) manager.
-        /// </summary>
-        ResourceManager RM;
+        {"fr-FR", $"{Utils.ProjectName}.Culture.fr-FR"},
+        {"ru-RU", $"{Utils.ProjectName}.Culture.ru-RU"}, // fr-CA использует те же ресурсы, что fr-FR
+        {"en-US", $"{Utils.ProjectName}.Culture.en-US"}
+    };
 
-        void InitiateCulture()
+    private ResourceManager _rm;
+
+    private void InitiateCulture()
+    {
+        ChangeCulture(CurrentThread.CurrentCulture);
+        UpdateUI();
+    }
+
+    private void ChangeCulture(CultureInfo ci)
+    {
+        ChangeCulture(ci.Name);
+    }
+
+    private void ChangeCulture(string language)
+    {
+#if DEBUG
+        Utils.Log($"Смена культуры на: {language}");
+#endif
+
+        var resourceName = SupportedCultures.TryGetValue(language, out var name)
+            ? name
+            : SupportedCultures[DefaultCulture];
+
+        try
         {
-            ChangeCulture(CurrentThread.CurrentCulture);
+            _rm = new ResourceManager(resourceName, Utils.Project);
+            // Проверка, что ресурсы доступны
+            _rm.GetString("TestResource", CultureInfo.GetCultureInfo(language));
         }
-
-        void ChangeCulture(CultureInfo ci)
+        catch (MissingManifestResourceException ex)
         {
-            ChangeCulture(ci.Name);
+#if DEBUG
+            Utils.Log($"Ошибка загрузки ресурсов для {language}: {ex.Message}. Используется {DefaultCulture}.");
+#endif
+            _rm = new ResourceManager(SupportedCultures[DefaultCulture], Utils.Project);
         }
+    }
 
-        void ChangeCulture(string language)
+    private void UpdateUI()
+    {
+        if (_rm == null) return;
+
+        try
         {
-            Utils.Log($"ChangeCulture - {language}");
-
-            switch (language)
-            {
-                case "fr-FR":
-                case "fr-CA":
-                    RM = new ResourceManager(
-                        $"{Utils.ProjectName}.Culture.fr-FR",
-                        Utils.Project
-                    );
-                    break;
-                    
-                default: // English
-                    RM = new ResourceManager(
-                        $"{Utils.ProjectName}.Culture.en-US",
-                        Utils.Project
-                    );
-                    break;
-            }
+            // Обновление текстов элементов UI
+            cmsiHide.Text = _rm.GetString("Hide", CurrentThread.CurrentCulture) ?? "&Hide";
+            csmiOptions.Text = _rm.GetString("Options", CurrentThread.CurrentCulture) ?? "&Options...";
+            cmsiChooseAssistant.Text = _rm.GetString("ChooseAssistant", CurrentThread.CurrentCulture) ??
+                                       "&Choose an assistant...";
+            cmsiAnimate.Text = _rm.GetString("Animate", CurrentThread.CurrentCulture) ?? "&Animate!";
+        }
+        catch (MissingManifestResourceException ex)
+        {
+#if DEBUG
+            Utils.Log($"Ошибка обновления UI для культуры {CurrentThread.CurrentCulture.Name}: {ex.Message}");
+#endif
         }
     }
 }
